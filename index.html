@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>FPPRO iPhone Model Numarası Kontrol Paneli</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2471A3;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 40px;
+    }
+    .logo { width: 150px; margin-bottom: 20px; }
+    h2 { margin: 0; margin-bottom: 20px; font-size: 22px; font-weight: normal; text-align: center; }
+    input {
+      padding: 10px; font-size: 16px; width: 90%; max-width: 400px; margin-bottom: 10px;
+      border: 1px solid #666; border-radius: 6px; background-color: rgba(0, 0, 0, 0.3); color: #fff;
+    }
+    button {
+      padding: 10px 20px; font-size: 16px; margin-top: 5px; cursor: pointer;
+      background-color: #28a745; border: none; border-radius: 6px; color: #fff;
+    }
+    .result, .imei-result {
+      margin-top: 20px; font-size: 18px; font-weight: bold; padding: 10px 20px;
+      border-radius: 8px; background-color: rgba(0, 0, 0, 0.4); width: 90%; max-width: 400px; text-align: center;
+    }
+    .supported { background-color: rgba(40, 167, 69, 0.8); }
+    .unsupported { background-color: rgba(220, 53, 69, 0.8); }
+  </style>
+</head>
+<body>
+
+  <img src="https://fpprotr.com/wp-content/uploads/2023/04/fppro-logo-symbol-white-nosubtitle.png" alt="FPPRO Logo" class="logo">
+  <h2>iPhone Model Numarası Kontrol Paneli</h2>
+
+  <input type="text" id="modelInput" placeholder="Model numarası girin (örn. A2211)">
+  <div id="modelResult" class="result"></div>
+
+  <br><br>
+
+  <h2>IMEI / Seri Numarası Kontrol</h2>
+
+  <input type="text" id="imeiInput" placeholder="IMEI veya Seri numarası girin">
+  <button onclick="checkImei()">Sorgula</button>
+  <div id="imeiResult" class="imei-result"></div>
+
+  <script>
+    const supportedModels = [
+      "A2211", "A2215", "A2218", "A2399", "A2403", "A2407", "A2411", "A2628",
+      "A2633", "A2638", "A2643", "A3090", "A3094", "A3102", "A3106", "A2296",
+      "A2783", "A3084", "A3295", "A3297", "A3296", "A3083", "A3292", "A3294",
+      "A3293", "A3082", "A3289", "A3291", "A3290", "A3081", "A3286", "A3288",
+      "A3287", "A2651", "A2893", "A2896", "A2895", "A2894", "A2650", "A2889",
+      "A2892", "A2891", "A2890", "A2632", "A2885", "A2888", "A2887", "A2886",
+      "A2649", "A2881", "A2884", "A2883", "A2882"
+    ];
+
+    const modelInput = document.getElementById("modelInput");
+    const modelResult = document.getElementById("modelResult");
+
+    modelInput.addEventListener("input", function () {
+      const model = modelInput.value.trim().toUpperCase();
+      if (!model) {
+        modelResult.textContent = "";
+        modelResult.className = "result";
+        return;
+      }
+      if (supportedModels.includes(model)) {
+        modelResult.textContent = "Destekli";
+        modelResult.className = "result supported";
+      } else {
+        modelResult.textContent = "Desteksiz";
+        modelResult.className = "result unsupported";
+      }
+    });
+
+    
+    function validateImeiFormat(input) {
+      const trimmed = input.trim().toUpperCase();
+      if (!trimmed) return { valid: false, error: "IMEI veya Seri numarası boş olamaz." };
+
+      if (/^[0-9]{15}$/.test(trimmed)) {
+        return { valid: true, type: "IMEI" }; // 15 haneli sayısal
+      } else if (/^[A-Z0-9]{10,17}$/.test(trimmed)) {
+        return { valid: true, type: "Serial" }; // Seri numarası (Apple genellikle 12–17 karakter)
+      } else if (trimmed.length < 10) {
+        return { valid: false, error: `En az ${10 - trimmed.length} karakter daha gerekli.` };
+      } else if (trimmed.length > 17) {
+        return { valid: false, error: `${trimmed.length - 17} karakter fazla.` };
+      } else {
+        return { valid: false, error: "Geçersiz format. Sadece harf ve rakam girin." };
+      }
+    }
+
+
+    async function checkImei() {
+      const imei = document.getElementById('imeiInput').value.trim();
+      const imeiResult = document.getElementById('imeiResult');
+      if (!imei) {
+        imeiResult.innerHTML = "Lütfen bir IMEI veya Seri numarası girin.";
+        return;
+      }
+      
+      const validation = validateImeiFormat(imei);
+      if (!validation.valid) {
+        imeiResult.innerHTML = "Hata: " + validation.error;
+        return;
+      }
+      imeiResult.innerHTML = "Sorgulanıyor...";
+    
+      try {
+        const response = await fetch(`api.php?imei=${imei}`);
+        const data = await response.json();
+        if (data.error) {
+          imeiResult.innerHTML = "Hata: " + data.error;
+        } else {
+          imeiResult.innerHTML = `<strong>Model:</strong> ${data.model}<br><strong>Model Numarası:</strong> ${data.model_number}<br><strong>Find My iPhone:</strong> ${data.find_my_iphone}`;
+        }
+      } catch (error) {
+        imeiResult.innerHTML = "Sorgu başarısız oldu.";
+      }
+    }
+  </script>
+
+</body>
+</html>
