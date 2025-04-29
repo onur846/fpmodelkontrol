@@ -110,7 +110,7 @@
       imeiResult.innerHTML = "Sorgulanıyor...";
 
       try {
-        const response = await fetch(`https://fpmodelkontrol.fwh.is/api.php?imei=${imei}`);
+        const response = await fetch(`https://fpmodelkontrol.vercel.app/api/imei?imei=${imei}`);
         const data = await response.json();
         if (data.error) {
           imeiResult.innerHTML = "Hata: " + data.error;
