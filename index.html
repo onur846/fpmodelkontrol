@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -125,7 +124,11 @@
         const data = await response.json();
 
         if (data.error || !data.model) {
-          imeiResult.innerHTML = "Hata: " + (data.error || "Model bulunamadı.");
+          if (data.error === "Invalid IMEI/Serial Number") {
+        imeiResult.innerHTML = "Hata: Hatalı IMEI / Seri Numarası";
+      } else {
+        imeiResult.innerHTML = "Hata: " + (data.error || "Model bulunamadı.");
+      }
         } else {
           const modelNumberMatch = data.model.match(/\(?(A\d{4})\)?/);
           const modelNumber = modelNumberMatch ? modelNumberMatch[1].toUpperCase() : "";
