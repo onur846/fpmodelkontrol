@@ -125,10 +125,10 @@
         const data = await response.json();
 
         if (data.error || !data.model) {
-          imeiResult.innerHTML = "Hata: " + ((data.error === "Invalid IMEI/Serial Number" ? "Hatalı IMEI / Seri Numarası" : data.error || "Model bulunamadı."));
+          imeiResult.innerHTML = "Hata: " + (data.error || "Model bulunamadı.");
         } else {
-          const modelNumberMatch = data.model.match(/\((A\d{{4}})\)/);
-          const modelNumber = modelNumberMatch ? modelNumberMatch[1] : "";
+          const modelNumberMatch = data.model.match(/\(?(A\d{4})\)?/);
+          const modelNumber = modelNumberMatch ? modelNumberMatch[1].toUpperCase() : "";
           const isSupported = supportedModels.includes(modelNumber);
 
           imeiSupport.textContent = isSupported ? "Destekli" : "Desteksiz";
